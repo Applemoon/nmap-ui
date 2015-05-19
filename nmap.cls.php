@@ -134,22 +134,26 @@ class WebMap {
   * @param bool $log Logging off by default since windows mostlikely won't have the tee command
   */
  function run_nmap($log=FALSE) {
+     $data = [];
     if ($this->submit && $this->host) {
-       echo '<p id="nmap_cmd">'.$this->nmapcmd.' '.$this->args.'</p>';
-       echo '<pre id="nmap_scan">';
-       if ($log) {
-        system($this->nmapcmd.' '.$this->args.' 2>&1 | tee nmap.'.$this->dtstamp.'.log' );
-       } else {
+       echo '<p class="nmap_cmd">'.$this->nmapcmd.' '.$this->args.'</p>';
+        ob_start();
         system($this->nmapcmd.' '.$this->args.' 2>&1' );
-       }
-       echo '</pre>';
+        $nmap_output = ob_get_clean();
+        if (preg_match_all("/([\d]+)\/(\w+)\s+(closed|open)\s+(\w+)/is", $nmap_output, $out)) {
+            $len = count($out[0]);
+            for ($i = 0; $i < $len; ++$i) {
+                $data[] = ["port" => $out[1][$i], "protocol" => $out[2][$i], "state" => $out[3][$i], "service" => $out[4][$i]];
+            }
+        }
+
+        ob_start();
+        require_once("result.html");
+        $result = ob_get_clean();
+
+        echo $result;
     }
  }
- /**
-  * xHTML Form for nMap front end
-  * @return string
-  */
-
 
 }
 ?>

@@ -5,6 +5,12 @@
     <title>NMAP сканер</title>
     <style type="text/css">
 
+        html, body {
+            margin:0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
         .overlay {
             display: none;
             width: 100%;
@@ -15,7 +21,7 @@
         }
 
         .text {
-            position: absolute;
+            position: fixed;
             width: 500px;
             top: 58%;
             font-size: 25px;
@@ -27,7 +33,7 @@
         }
         .preloader{
             display: none;
-            position:absolute;
+            position:fixed;
             top: 48%;
             left: 49%;
             width: 62px;
@@ -88,56 +94,83 @@
             margin: 2px;
         }
 
-        .tablebgcolor {
-            background-color: #565363;
-            width: 900px;
-            padding: 5px;
+        div.hostsectioncolor {
+            background-color: #999;
+            width: 100%;
+            padding: 20px;
             text-align: center;
             margin: 0 auto;
+            font-size: 20px;
+
         }
 
-        div.hostsectioncolor {
-            background-color: #123456;
-            width: 900px;
-            padding: 5px;
-            text-align: center;
-            margin: 0 auto;
+        div.hostsectioncolor .title {
+            position: absolute;
+            width: 200px;
+            text-align: left;
+
+            color: #fff;
+        }
+
+        div.hostsectioncolor b {
+            color: #fff;
+            font-weight: normal;
         }
 
         input.host {
-            width: 100px;
+            width: 150px;
+            border: 1px solid #999;
+            padding: 5px;
+            outline: none;
         }
 
         input.button {
-            width: 40px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 2px;
+            padding: 5px 10px;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
         }
 
         div.scansectioncolor {
-            background-color: #567890;
+            background-color: #999;
             height: 230px;
-            width: 200px;
+            width: 250px;
             padding: 5px;
             float: left;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #567890;
         }
 
         div.options {
             width: 900px;
             margin: 0 auto;
+            overflow: hidden;
+            margin-top: 10px;
         }
 
         div.generalsectioncolor {
             background-color: #f7f7f7;
             padding: 5px;
             height: 230px;
-
+            width: 615px;
+            border: 1px solid #567890;
+            border-radius: 5px;
+            float: left;
         }
 
         div.generalsectioncolor div {
             float: right;
+            margin-right: 50px;
         }
 
         h2 {
             text-align: center;
+            margin: 10px 0;
+            color: #567890;
         }
 
         input.gen {
@@ -151,6 +184,7 @@
             border: none;
             min-height: 300px;
         }
+
     </style>
 </head>
 <body>
@@ -164,10 +198,8 @@
     <span></span>
 </div>
 <form action="index.php" method="POST" target="output" id="form">
-    <div class="tablebgcolor">
-        <h1>NMAP</h1>
-    </div>
     <div class="hostsectioncolor">
+        <div class="title">NMAP</div>
         <b>Хост:</b>
         <input class="host" type="text" name="host" value="mail.ru"/>
         <input class="button" type="submit" name="submit" value="scan"/>
@@ -187,7 +219,7 @@
             </ul>
         </div>
         <div class="generalsectioncolor">
-            <h2>Остальны опции:</h2>
+            <h2>Остальные опции:</h2>
 
             <div>
                 <ul>
@@ -240,10 +272,12 @@
     var form = document.getElementsByTagName('form')[0];
     var overlay = document.getElementById('overlay');
     var preloader = document.getElementById('preloader');
+
     // сработает
     iframe.onload = function () {
         overlay.style.display = 'none';
         preloader.style.display = 'none';
+        document.getElementsByTagName('iframe')[0].height = document.getElementsByTagName('iframe')[0].contentWindow.document.body.scrollHeight;
     };
 
     form.onsubmit = function () {
