@@ -136,7 +136,6 @@ class WebMap {
  function run_nmap($log=FALSE) {
      $data = [];
     if ($this->submit && $this->host) {
-       echo '<p class="nmap_cmd">'.$this->nmapcmd.' '.$this->args.'</p>';
         ob_start();
         system($this->nmapcmd.' '.$this->args.' 2>&1' );
         $nmap_output = ob_get_clean();

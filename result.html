@@ -61,37 +61,154 @@
             cursor: pointer;
             user-select: none;
         }
+
+        .diff {
+            display: none;
+        }
+
+        .row {
+            overflow: hidden;
+            height: 60px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+        }
+
+        .last {
+            position: relative;
+            float: left;
+            width: 48%;
+            height: 100%;
+            border-radius: 5px;
+            border: 1px solid #567890;
+        }
+
+        .current {
+            position: relative;
+            float: right;
+            width: 48%;
+            height: 100%;
+            border-radius: 5px;
+            border: 1px solid #567890;
+            background-color: greenyellow;
+        }
+
+        .diff-btn {
+            background-color: #3498db;
+            border: none;
+            border-radius: 2px;
+            padding: 5px 10px;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            outline: none;
+        }
+
+        .same {
+            background-color: #2ecc71;
+        }
     </style>
 </head>
 <body>
-    <div class="result">
-        <? foreach ($data as $item): ?>
-            <div class="item<?=$item['state'] == 'open' ? ' item_open': ''?>">
-                <div class="port"><?=$item["port"]?></div>
-                <div class="protocol"><?=$item["protocol"]?></div>
-                <div class="state"><?=$item['state'] == 'open' ? 'Порт открыт': 'Порт закрыт'?></div>
-                <div class="service"><?=$item["service"]?></div>
-            </div>
-        <? endforeach ?>
+<p class="nmap_cmd"><?=$this->nmapcmd.' '.$this->args;?></p>
+<button class="diff-btn">Show Diff</button>
+<div class="result">
+    <? foreach ($data as $item): ?>
+    <div class="item<?=$item['state'] == 'open' ? ' item_open': ''?>">
+        <div class="port"><?=$item["port"]?></div>
+        <div class="protocol"><?=$item["protocol"]?></div>
+        <div class="state"><?=$item['state'] == 'open' ? 'Порт открыт': 'Порт закрыт'?></div>
+        <div class="service"><?=$item["service"]?></div>
     </div>
-    <div class="raw">
-        <pre><?=$nmap_output?></pre>
+    <? endforeach ?>
+</div>
+<div class="raw">
+    <pre><?=$nmap_output?></pre>
+</div>
+<div class="diff">
+    <div class="row">
+        <div class="last #lsame#">
+            <div class="port">#lastport#</div>
+        </div>
+        <div class="current #csame#">
+            <div class="port">#currentport#</div>
+        </div>
     </div>
-    <script>
+</div>
+<script>
 
-        var raw = false;
+    var raw = false;
+    var diff = false;
+    var last = <?=json_encode($data);?>;
+    var current = <?=json_encode($data);?>;
+    last = localStorage.getItem("last") ? JSON.parse(localStorage.getItem("last")) : last;
+    localStorage.setItem("last", JSON.stringify(current));
 
-        document.getElementsByClassName('nmap_cmd')[0].addEventListener('click', function () {
-            if (raw) {
-                document.getElementsByClassName('raw')[0].style.display = 'none';
-                document.getElementsByClassName('result')[0].style.display = 'block';
+    var tmpl = document.getElementsByClassName('diff')[0].innerHTML;
+
+    var out = "";
+
+    if (last.length >= current.length) {
+        for (var i in last) {
+            for (var j in current) {
+                if (last[i].port == current[j].port) {
+                    current[j].flag = true;
+                    last[i].flag = true;
+                }
             }
-            else {
-                document.getElementsByClassName('raw')[0].style.display = 'block';
-                document.getElementsByClassName('result')[0].style.display = 'none';
+            out += tmpl.replace("#currentport#", current[i] ? current[i].port : '')
+                    .replace("#lastport#", last[i] ? last[i].port : '')
+                    .replace("#csame#", current[i] ? current[i].flag ? 'same' : '' : '')
+                    .replace("#lsame#", last[i] ? last[i].flag ? 'same' : '' : '')
+
+        }
+    }
+    else {
+        for (var i in current) {
+            for (var j in last) {
+                if (last[j].port == current[i].port) {
+                    current[i].flag = true;
+                    last[j].flag = true;
+                }
             }
-            raw = !raw;
-        });
-    </script>
+            out += tmpl.replace("#currentport#", current[i] ? current[i].port : '')
+                    .replace("#lastport#", last[i] ? last[i].port : '')
+                    .replace("#csame#", current[i] ? current[i].flag ? 'same' : '' : '')
+                    .replace("#lsame#", last[i] ? last[i].flag ? 'same' : '' : '')
+
+        }
+    }
+
+    document.getElementsByClassName('diff')[0].innerHTML = out;
+
+
+    document.getElementsByClassName('diff-btn')[0].addEventListener('click', function () {
+        if (diff) {
+            document.getElementsByClassName('diff')[0].style.display = 'none';
+            document.getElementsByClassName('result')[0].style.display = 'block';
+            document.getElementsByClassName('raw')[0].style.display = 'none';
+        }
+        else {
+            document.getElementsByClassName('raw')[0].style.display = 'none';
+            document.getElementsByClassName('result')[0].style.display = 'none';
+            document.getElementsByClassName('diff')[0].style.display = 'block';
+        }
+        diff = !diff;
+    });
+
+    document.getElementsByClassName('nmap_cmd')[0].addEventListener('click', function () {
+        if (raw) {
+            document.getElementsByClassName('raw')[0].style.display = 'none';
+            document.getElementsByClassName('result')[0].style.display = 'block';
+            document.getElementsByClassName('diff')[0].style.display = 'none';
+        }
+        else {
+            document.getElementsByClassName('raw')[0].style.display = 'block';
+            document.getElementsByClassName('result')[0].style.display = 'none';
+            document.getElementsByClassName('diff')[0].style.display = 'none';
+        }
+        raw = !raw;
+    });
+</script>
 </body>
 </html>
